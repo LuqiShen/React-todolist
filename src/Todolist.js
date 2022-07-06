@@ -1,74 +1,51 @@
-import React, { Component, Fragment } from "react";
-import "./css.css";
-import TodoItem from "./TodoItem";
+import React, { Component } from "react";
+import { Input, Button, List } from "antd";
+import store from "./store";
 
-class Todolist extends Component {
+class TodoList extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      inputValue: "",
-      list: ["学习英文", "学习React"],
-    };
-
+    this.state = store.getState();
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleButtonClick = this.handleButtonClick.bind(this);
-    this.handleItemDelete = this.handleItemDelete.bind(this);
+    this.handleStoreChange = this.handleStoreChange.bind(this);
+    store.subscribe(this.handleStoreChange);
   }
-
   render() {
     return (
-      <Fragment>
-        {/* */}
-        <div>
-          <label htmlFor="insertArea">输入内容</label>
-          <input
-            id="insertArea"
-            className="input"
-            value={this.state.inputValue}
-            onChange={this.handleInputChange}
-          />
-          <button onClick={this.handleButtonClick}>提交</button>
-        </div>
+      <div style={{ margin: "10px" }}>
+        <Input
+          value={this.state.inputValue}
+          placeholder="todo info"
+          style={{ width: "300px", marginLeft: "10px" }}
+          onChange={this.handleInputChange}
+        />
+        <Button type="primary" style={{ marginLeft: "10px" }}>
+          提交
+        </Button>
 
-        <ul>{this.getTodoItem()}</ul>
-      </Fragment>
+        <List
+          style={{ width: "300px", marginLeft: "10px", marginTop: "10px" }}
+          bordered
+          dataSource={this.state.list}
+          renderItem={(item) => <List.Item>{item}</List.Item>}
+        />
+      </div>
     );
   }
 
-  getTodoItem() {
-    return this.state.list.map((item, index) => {
-      return (
-        <TodoItem
-          key={index}
-          content={item}
-          index={index}
-          deleteItem={this.handleItemDelete}
-        />
-      );
-    });
-  }
-
   handleInputChange(e) {
-    const value = e.target.value;
-    this.setState(() => ({
-      inputValue: value,
-    }));
+    const action = {
+      type: "change_input_value",
+      value: e.target.value,
+    };
+
+    store.dispatch(action);
   }
 
-  handleButtonClick() {
-    this.setState((prevState) => ({
-      list: [...prevState.list, prevState.inputValue],
-      inputValue: "",
-    }));
-  }
-
-  handleItemDelete(index) {
-    this.setState((prevState) => {
-      const list = [...prevState.list];
-      list.splice(index, 1);
-      return { list };
-    });
+  handleStoreChange() {
+    this.setState(store.getState());
+    console.log("store changed");
   }
 }
 
-export default Todolist;
+export default TodoList;
